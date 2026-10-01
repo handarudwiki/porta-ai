@@ -1,0 +1,678 @@
+
+LLM = Gemini
+
+1. MONETARY_POLICY
+
+Contoh:
+
+“Bank Indonesia mempertahankan BI-Rate di 5,25% dan memberi sinyal kemungkinan penurunan suku bunga pada kuartal berikutnya.”
+
+Event type
+MONETARY_POLICY
+├── RATE_CHANGE
+├── RATE_HOLD
+├── RATE_CUT
+├── QE_QT
+└── CENTRAL_BANK_GUIDANCE
+Data yang diekstrak
+{
+  "central_bank": "Bank Indonesia",
+  "policy_rate": "BI-Rate",
+  "previous_rate": 5.25,
+  "new_rate": 5.25,
+  "change_bps": 0,
+  "direction": "HOLD",
+  "effective_date": "...",
+  "decision_date": "...",
+  "reason": [
+    "inflation",
+    "exchange_rate"
+  ],
+  "guidance": "potential easing",
+  "guidance_direction": "DOVISH",
+  "confidence": 0.96
+}
+Logic
+Rate naik
+    ↓
+cost of money ↑
+    ↓
+borrowing cost ↑
+    ↓
+potential pressure:
+- banks
+- property
+- consumer
+- highly leveraged companies
+
+Tapi jangan langsung bilang “BBCA turun”.
+
+Porta harus:
+
+Event
+↓
+Economic mechanism
+↓
+Affected sectors
+↓
+User exposure
+
+Misalnya:
+
+BI +50 bps
+↓
+Financial sector sensitivity: HIGH
+↓
+User financial exposure: 48%
+↓
+Portfolio relevance: HIGH
+2. FISCAL_POLICY
+
+Ini event pemerintah terkait pajak, subsidi, belanja pemerintah, perdagangan, dll.
+
+Contoh:
+
+“Pemerintah menaikkan pajak ekspor komoditas X menjadi 10%.”
+
+Extraction
+{
+  "government": "Indonesia",
+  "policy": "export tax",
+  "action": "INCREASE",
+  "old_rate": 5,
+  "new_rate": 10,
+  "unit": "percent",
+  "affected_industry": "mining",
+  "affected_commodity": "nickel",
+  "effective_date": "...",
+  "scope": "export",
+  "reason": "..."
+}
+Logic
+Policy
+↓
+Affected activity
+↓
+Industry
+↓
+Companies
+↓
+Portfolio exposure
+
+Contoh:
+
+Export tax ↑
+↓
+Nickel exporters
+↓
+Mining companies
+↓
+ANTM / INCO
+↓
+User owns INCO 15%
+↓
+HIGH portfolio relevance
+3. REGULATION
+
+Bedakan dengan fiscal policy.
+
+Fiscal = kebijakan ekonomi pemerintah seperti pajak/subsidi.
+
+Regulation = aturan yang mengubah bagaimana perusahaan/industri boleh beroperasi.
+
+Contoh:
+
+“OJK menerbitkan aturan baru mengenai batas kepemilikan fintech.”
+
+Extraction
+{
+  "regulator": "OJK",
+  "regulation_name": "...",
+  "action": "NEW_REGULATION",
+  "affected_industry": "fintech",
+  "affected_entities": [],
+  "requirement": "...",
+  "threshold": "...",
+  "effective_date": "...",
+  "transition_period": "...",
+  "penalty": "...",
+  "status": "ANNOUNCED"
+}
+Logic
+Regulation
+↓
+Who is affected?
+↓
+What requirement changes?
+↓
+Cost / revenue / operation impact
+↓
+Affected companies
+↓
+Portfolio exposure
+
+Misalnya:
+
+New capital requirement
+↓
+Banking sector
+↓
+Potential impact on capital allocation
+↓
+User has 45% banking exposure
+↓
+Relevant
+4. MACROECONOMIC
+
+Ini bukan policy. Ini data/kejadian ekonomi.
+
+Contoh:
+
+“Inflasi Indonesia mencapai 3,2%, di atas ekspektasi 2,9%.”
+
+Extraction
+{
+  "indicator": "CPI",
+  "country": "Indonesia",
+  "period": "August 2026",
+  "actual": 3.2,
+  "expected": 2.9,
+  "previous": 2.8,
+  "unit": "percent",
+  "frequency": "monthly",
+  "surprise": 0.3,
+  "direction": "ABOVE_EXPECTATION"
+}
+
+Bagian expected vs actual sangat penting.
+
+Karena:
+
+Inflation = 3.2%
+
+sendiri belum tentu menarik.
+
+Yang lebih penting:
+
+Actual 3.2%
+Expected 2.9%
+        ↓
+Positive surprise +0.3%
+Logic
+Macro indicator
+↓
+Surprise
+↓
+Market interpretation
+↓
+Affected factors
+↓
+Sector/company exposure
+
+Event extraction untuk financial news memang sering membutuhkan angka, tanggal, entity, dan atribut seperti intensity/modality.
+
+5. CORPORATE
+
+Ini salah satu yang paling besar.
+
+Saya akan pecah:
+
+CORPORATE
+├── EARNINGS
+├── EARNINGS_GUIDANCE
+├── MANAGEMENT_GUIDANCE
+├── MAJOR_CONTRACT
+├── M_AND_A
+├── DEBT_DEFAULT
+├── LEGAL_EVENT
+└── MANAGEMENT_CHANGE
+5A. EARNINGS
+
+Contoh:
+
+“BBCA membukukan laba bersih Rp18 triliun pada Q3, naik 15% YoY.”
+
+Extraction
+{
+  "company": "BBCA",
+  "period": "Q3 2026",
+  "revenue": 0,
+  "net_income": 18000000000000,
+  "net_income_growth_yoy": 15,
+  "eps": 0,
+  "expected_net_income": 17000000000000,
+  "earnings_surprise": 5.9,
+  "margin": 0,
+  "guidance": null
+}
+Logic
+Actual
+vs
+Previous
+vs
+Analyst expectation
+↓
+Beat / Meet / Miss
+↓
+Fundamental assessment
+↓
+Portfolio exposure
+
+Jadi jangan cuma:
+
+“Profit naik 15%.”
+
+Tapi:
+
+Profit naik 15%, sekaligus 6% di atas consensus.
+
+Itu jauh lebih meaningful.
+
+6. COMMODITY
+
+Contoh:
+
+“Harga nickel turun 5% setelah data menunjukkan peningkatan supply.”
+
+Extraction
+{
+  "commodity": "Nickel",
+  "price": 15000,
+  "previous_price": 15790,
+  "change_percent": -5.0,
+  "unit": "USD/ton",
+  "market": "LME",
+  "direction": "DOWN",
+  "driver": [
+    "increased_supply"
+  ],
+  "supply_change": null,
+  "demand_change": null
+}
+Logic
+
+Yang menarik bukan hanya:
+
+Nickel -5%
+
+tetapi:
+
+Nickel -5%
+↓
+Why?
+↓
+Supply increase
+↓
+Nickel producers
+↓
+Revenue / margin sensitivity
+↓
+ANTM / INCO
+↓
+User exposure
+
+Jadi commodity event harus punya driver.
+
+7. GEOPOLITICAL
+
+Contoh:
+
+“Konflik di wilayah X meningkat setelah serangan terhadap fasilitas energi.”
+
+Extraction
+{
+  "event_type": "CONFLICT_ESCALATION",
+  "actors": [
+    "Country A",
+    "Country B"
+  ],
+  "location": "...",
+  "action": "ATTACK",
+  "target": "energy infrastructure",
+  "severity": "HIGH",
+  "status": "ESCALATING",
+  "start_date": "...",
+  "affected_commodities": [
+    "oil"
+  ],
+  "affected_regions": [],
+  "sanctions": false
+}
+Logic
+
+Ini menarik karena bisa menghasilkan event chain:
+
+Conflict escalation
+        ↓
+Supply disruption risk
+        ↓
+Oil ↑
+        ↓
+Energy companies potentially benefit
+        ↓
+Transportation costs ↑
+        ↓
+Airlines / logistics potentially pressured
+
+Jadi jangan bikin:
+
+War = bearish
+
+Itu terlalu simplistik.
+
+Porta harus memahami transmission mechanism.
+
+8. MARKET
+
+Ini berbeda dari event fundamental.
+
+Market event adalah apa yang benar-benar terjadi di market.
+
+Contoh:
+
+“IHSG turun 3,2% dengan volume perdagangan 2x rata-rata.”
+
+Extraction
+{
+  "instrument": "IDX Composite",
+  "price_change_percent": -3.2,
+  "volume": 25000000000,
+  "average_volume": 12000000000,
+  "volume_ratio": 2.08,
+  "volatility": 0,
+  "direction": "DOWN",
+  "time": "...",
+  "sector": null
+}
+Event types
+MARKET
+├── LARGE_PRICE_MOVE
+├── VOLUME_SPIKE
+├── VOLATILITY_SPIKE
+├── MARKET_STRESS
+└── SECTOR_ROTATION
+Logic
+
+Misalnya:
+
+BBCA -5%
+Volume 3x average
+↓
+Is it normal?
+↓
+No
+↓
+Check news/events
+↓
+Find possible catalyst
+
+Ini bahkan bisa menjadi feedback loop ke Event Engine.
+
+News Event
+      ↓
+Expected impact
+      ↓
+Actual market reaction
+      ↓
+MARKET EVENT
+
+Jadi Porta bisa mengetahui:
+
+“Kami mendeteksi event X, dan market kemudian bergerak Y.”
+
+9. CORPORATE_ACTION
+
+Ini menurut saya wajib untuk portfolio intelligence.
+
+Contohnya:
+
+Dividend
+Buyback
+Rights Issue
+Stock Split
+IPO
+Tender Offer
+Dividend
+
+“BBCA announces dividend Rp250/share.”
+
+Extraction
+{
+  "company": "BBCA",
+  "action": "DIVIDEND",
+  "dividend_per_share": 250,
+  "currency": "IDR",
+  "dividend_type": "INTERIM",
+  "ex_date": "...",
+  "record_date": "...",
+  "payment_date": "...",
+  "yield": 0
+}
+Logic
+Dividend announcement
+↓
+Does user own BBCA?
+↓
+YES
+↓
+Shares × dividend/share
+↓
+Estimated dividend
+↓
+Notify user
+
+Ini contoh event yang market materiality-nya mungkin sedang, tapi portfolio relevance-nya sangat tinggi.
+
+Yang lebih penting: jangan berhenti di extraction
+
+Ini bagian yang menurut gue paling penting buat desain Porta.
+
+Setiap event sebaiknya melewati 5 layer:
+
+1. DETECTION
+      ↓
+2. EXTRACTION
+      ↓
+3. NORMALIZATION
+      ↓
+4. IMPACT ANALYSIS
+      ↓
+5. PORTFOLIO RELEVANCE
+
+Contohnya:
+
+News
+
+“BI raises rate 25 bps.”
+
+1. Detection
+category = MONETARY_POLICY
+event_type = RATE_CHANGE
+2. Extraction
+previous_rate = 5.25
+new_rate = 5.50
+change = +25 bps
+3. Normalization
+central_bank_id = BI
+country = ID
+direction = INCREASE
+4. Impact
+rate ↑
+↓
+funding cost ↑
+↓
+interest-sensitive sectors
+5. Portfolio relevance
+User portfolio:
+Banks 45%
+Property 12%
+Consumer 8%
+Gold 5%
+
+Financial sensitivity = HIGH
+Property sensitivity = HIGH
+Gold = LOW/MIXED
+
+Lalu:
+
+market_materiality = HIGH
+portfolio_relevance = HIGH
+confidence = 0.94
+Jadi schema universalnya bisa seperti ini
+
+Saya justru menyarankan jangan bikin 9 tabel berbeda.
+
+Bikin common event envelope:
+
+{
+  "event_id": "EVT-001",
+
+  "category": "MONETARY_POLICY",
+  "event_type": "RATE_CHANGE",
+
+  "title": "BI raises policy rate by 25 bps",
+
+  "entities": [
+    {
+      "type": "CENTRAL_BANK",
+      "id": "BI"
+    }
+  ],
+
+  "event_data": {
+    "previous_rate": 5.25,
+    "new_rate": 5.50,
+    "change_bps": 25,
+    "direction": "INCREASE"
+  },
+
+  "time": {
+    "occurred_at": "...",
+    "effective_at": "..."
+  },
+
+  "factuality": {
+    "status": "CONFIRMED",
+    "confidence": 0.96
+  },
+
+  "market_impact": {
+    "materiality": 0.87,
+    "level": "HIGH"
+  },
+
+  "affected": {
+    "sectors": [
+      "BANKING",
+      "PROPERTY"
+    ],
+    "companies": [
+      "BBCA",
+      "BMRI"
+    ]
+  }
+}
+
+Ini sejalan dengan pendekatan event extraction yang menggunakan predefined event types + arguments/roles + attributes, bukan membiarkan model menghasilkan struktur bebas setiap kali.
+
+Terus event_data beda-beda
+
+Ini kuncinya.
+
+RATE_CHANGE
+→ previous_rate
+→ new_rate
+→ change_bps
+→ guidance
+
+EARNINGS
+→ revenue
+→ net_income
+→ EPS
+→ growth
+→ estimate
+→ surprise
+
+DIVIDEND
+→ DPS
+→ ex_date
+→ record_date
+→ payment_date
+
+COMMODITY_PRICE_CHANGE
+→ old_price
+→ new_price
+→ change_percent
+→ supply/demand driver
+
+REGULATION
+→ regulator
+→ action
+→ requirement
+→ affected_industry
+→ effective_date
+
+CONFLICT
+→ actors
+→ location
+→ action
+→ severity
+→ affected_commodity
+
+MARKET_MOVE
+→ instrument
+→ price_change
+→ volume
+→ volatility
+Dan akhirnya semua masuk ke Portfolio Engine
+
+Ini yang bikin Porta bukan sekadar news summarizer.
+
+              SECTORS API
+                   │
+                   ▼
+              NEWS ARTICLE
+                   │
+                   ▼
+            EVENT EXTRACTION
+                   │
+          ┌────────┴────────┐
+          ▼                 ▼
+       EVENT DATA         ENTITIES
+          │                 │
+          └────────┬────────┘
+                   ▼
+             IMPACT ENGINE
+                   │
+          ┌────────┴─────────┐
+          ▼                  ▼
+    MARKET MATERIALITY   PORTFOLIO EXPOSURE
+          │                  │
+          └────────┬─────────┘
+                   ▼
+          PORTFOLIO RELEVANCE
+                   │
+                   ▼
+        ┌──────────┴──────────┐
+        ▼                     ▼
+   TELEGRAM ALERT          DASHBOARD
+
+Dan dari sini baru bisa lahir:
+
+Daily Brief
+
+“Dari 37 events hari ini, 5 relevan terhadap portfolio Anda.”
+
+Flash Note
+
+“Event X baru terjadi dan exposure Anda tinggi.”
+
+Earnings Note
+
+“BBCA earnings released. Portfolio exposure 30%.”
+
+Portfolio Review
+
+“3 events minggu ini menjelaskan sebagian besar perubahan portfolio.”
+
+Jadi event extraction adalah fondasi, bukan output akhir. Bahkan riset event extraction finansial juga menekankan event coreference/relasi antar-event, factuality, modality, dan participant arguments—ini penting supaya Porta tidak menganggap setiap artikel sebagai kejadian baru.

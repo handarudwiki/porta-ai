@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/poll?autoSendTelegram=true",
+      "schedule": "0 * * * *"
+    }
+  ]
+}
